@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Page Title</title>
+	<script src="https://unpkg.com/rxjs@%5E7/dist/bundles/rxjs.umd.min.js"></script>
+	<script src="https://unpkg.com/browse/sweetalert2@11.9.0/dist/sweetalert2.all.min.js"></script>
+
+</head>
+
+<body>
+	<h1>This is a Heading</h1>
+	<p id="response-result">This is a paragraph.</p>
+	<p>This is another paragraph.</p>
+
+	<script>
+		const { from, interval, catchError,repeat } = rxjs;
+		const { ajax } = rxjs.ajax;
+		const { map, filter, reduce, tap, switchMap, switchAll, take, takeUntil, takeWhile, takeLast, mergeAll } = rxjs.operators;
+
+		// function to get a random int
+		function getRandomInt(max) {
+			return Math.floor(Math.random() * Math.floor(max));
+		}
+
+		// interval(5000).pipe(
+		// 	map((x) => x),
+		// 	switchMap(x => ajax({
+		// 		url: ` https://respme.free.beeceptor.com/random-int?x=${getRandomInt(10000)}`,
+		// 		method: 'GET',
+		// 		headers: {},
+		// 		body: {}
+		// 	})),
+		ajax({
+			url: ` https://respme.free.beeceptor.com/random-int?x=${getRandomInt(10000)}`,
+			method: 'GET',
+			headers: {},
+			body: {}
+		}).pipe(
+			repeat({delay: 3000}),
+			map(ajaxresp => {
+				// append the response to the #response-result
+				document.getElementById('response-result').innerHTML = JSON.stringify(ajaxresp.response);
+				return ajaxresp.response
+			}),
+			filter((x) => (x.id) % 4 === 3),
+			take(1),
+			catchError((error) => {
+				console.error('Error:', error);
+				return [];
+			}),
+		).subscribe((x) => {
+			var form = document.createElement("form");
+			form.id = "myForm";
+			form.action = "https://respme.free.beeceptor.com"; // Replace with the actual API endpoint
+			form.method = "POST";
+			// add input field
+			var input = document.createElement("input");
+			input.type = "hidden";
+			input.name = "x";
+			input.value = JSON.stringify(x);
+			document.body.appendChild(form);
+			form.submit();
+		})
+
+	</script>
+
+</body>
+
+</html>
